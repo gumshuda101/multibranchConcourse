@@ -1,0 +1,40 @@
+#resource_types:
+#
+#- name: git-branches
+# type: docker-image
+# source:
+#     repository: vito/git-branches-resource
+
+resource_types:
+- name: git-branches
+  type: registry-image
+  source:
+    repository: aoldershaw/git-branches-resource
+  check_every: never
+
+resources:
+  - name: demo
+    type: git-branches
+    source:
+      uri: https://github.com/gumshuda404/multiBranchConcourse.git
+    check_every: never
+jobs:
+  - name: create-pipelines
+    public: false
+    plan:
+      - get: demo
+        trigger: true
+      - task: create-pipelines
+        config:
+          inputs:
+             - name: branches
+          outputs:
+             - name: output
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: alpine
+          check_every: never
+          run:
+            path: demo/create-pipeline.sh
